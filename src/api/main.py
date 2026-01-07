@@ -95,9 +95,9 @@ def startup_event():
     print("Setting up User DB...")
     init_db()
     
-    # Starting with empty events as per user request
-    DB_EVENTS = []
-    print("System ready (empty dataset).")
+    # Force clear any residual in-memory data
+    DB_EVENTS.clear() 
+    print("System ready (empty dataset confirmed).")
 
 @app.get("/events", response_model=List[UnifiedEvent])
 def get_events(
@@ -224,12 +224,28 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
+@app.delete("/events")
+def clear_events(current_user: User = Depends(get_current_user)):
+    """Clear all events from the in-memory database."""
+    global DB_EVENTS
+    DB_EVENTS.clear()
+    print(f"User {current_user.username} cleared all events.")
+    return {"status": "success", "message": "All events have been cleared"}
+
 @app.post("/upload/logs")
-async def upload_logs(file: UploadFile = File(...)):
+async def upload_logs(
+    file: UploadFile = File(...), 
+    clear_existing: bool = Query(False),
+    current_user: User = Depends(get_current_user)
+):
     """
     Upload a CSV or JSON log file for analysis.
     """
     global DB_EVENTS
+    
+    if clear_existing:
+        print(f"DEBUG: Clearing existing data before upload for {current_user.username}")
+        DB_EVENTS.clear()
     
     file_extension = os.path.splitext(file.filename)[1].lower()
     if file_extension not in [".csv", ".json"]:

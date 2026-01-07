@@ -7,6 +7,7 @@ const UploadLogs = () => {
     const [file, setFile] = useState(null);
     const [status, setStatus] = useState('idle'); // idle, uploading, success, error
     const [message, setMessage] = useState('');
+    const [clearExisting, setClearExisting] = useState(true);
     const navigate = useNavigate();
 
     const handleFileChange = (e) => {
@@ -23,7 +24,7 @@ const UploadLogs = () => {
 
         setStatus('uploading');
         try {
-            const result = await uploadLogs(file);
+            const result = await uploadLogs(file, clearExisting);
             setStatus('success');
             setMessage(result.message);
 
@@ -90,6 +91,19 @@ const UploadLogs = () => {
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Supports CSV and JSON log formats</p>
                         </div>
                     )}
+                </div>
+
+                <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', color: 'var(--text-muted)' }}>
+                    <input
+                        type="checkbox"
+                        id="clear-existing"
+                        checked={clearExisting}
+                        onChange={(e) => setClearExisting(e.target.checked)}
+                        style={{ cursor: 'pointer', width: '1.2rem', height: '1.2rem' }}
+                    />
+                    <label htmlFor="clear-existing" style={{ cursor: 'pointer', fontSize: '0.95rem' }}>
+                        Wipe existing dashboard data before analysis
+                    </label>
                 </div>
 
                 <div style={{ marginTop: '2rem' }}>

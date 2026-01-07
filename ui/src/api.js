@@ -10,14 +10,29 @@ export const getTopIPs = () => fetch(`${API_BASE}/stats/top-ips`).then(res => re
 export const getExplanation = (id) => fetch(`${API_BASE}/explain/${id}`).then(res => res.json());
 export const getStoryline = (ip) => fetch(`${API_BASE}/storyline/${ip}`).then(res => res.json());
 
-export const uploadLogs = (file) => {
+export const uploadLogs = (file, clearExisting = false) => {
     const formData = new FormData();
     formData.append('file', file);
-    return fetch(`${API_BASE}/upload/logs`, {
+    return fetch(`${API_BASE}/upload/logs?clear_existing=${clearExisting}`, {
         method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
         body: formData
     }).then(res => {
         if (!res.ok) return res.json().then(d => { throw new Error(d.detail || 'Upload failed') });
+        return res.json();
+    });
+};
+
+export const clearAllEvents = () => {
+    return fetch(`${API_BASE}/events`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    }).then(res => {
+        if (!res.ok) return res.json().then(d => { throw new Error(d.detail || 'Clear failed') });
         return res.json();
     });
 };

@@ -26,9 +26,35 @@ const Dashboard = () => {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <header>
-                <h1 style={{ margin: 0 }}>Security Overview</h1>
-                <p style={{ color: 'var(--text-muted)', margin: 0 }}>Real-time threat monitoring</p>
+            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <div>
+                    <h1 style={{ margin: 0 }}>Security Overview</h1>
+                    <p style={{ color: 'var(--text-muted)', margin: 0 }}>Real-time threat monitoring</p>
+                </div>
+                <button
+                    onClick={async () => {
+                        if (window.confirm("Are you sure you want to clear all data?")) {
+                            const { clearAllEvents } = await import('../api');
+                            await clearAllEvents();
+                            window.location.reload();
+                        }
+                    }}
+                    style={{
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        color: '#ef4444',
+                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                        padding: '0.75rem 1.25rem',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
+                >
+                    Clear All Data
+                </button>
             </header>
 
             {/* Stats Row */}
