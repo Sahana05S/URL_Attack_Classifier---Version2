@@ -1,0 +1,7 @@
+timestamp,source_ip,method,url,user_agent,status_code,response_size,payload,attack_type,is_successful,confidence,rule_hits
+2026-01-07 10:00:00,192.168.1.100,GET,/api/products/123,"Mozilla/5.0",200,1024,,Normal,False,0.99,[]
+2026-01-07 10:05:00,45.33.22.11,POST,/login,"Mozilla/5.0",401,512,"{'user': 'admin', 'password': 'password123'}",Normal,False,0.95,[]
+2026-01-07 10:10:00,10.0.0.5,GET,"/search?q=phone' UNION SELECT NULL,NULL--","sqlmap/1.4.7",200,4096,,SQLi,True,0.98,"['SQL Injections Pattern']"
+2026-01-07 10:15:00,172.16.0.25,GET,"/profile?name=<script>alert('XSS')</script>","Mozilla/5.0",200,2048,,XSS,True,0.99,"['XSS Script Tag']"
+2026-01-07 10:20:00,192.168.1.100,GET,/api/user/settings,"Mozilla/5.0",200,800,,Normal,False,0.99,[]
+2026-01-07 10:25:00,88.99.100.2,POST,/admin/config,"curl/7.68.0",403,128,"{'action': 'delete_all'}",Normal,False,0.92,[]

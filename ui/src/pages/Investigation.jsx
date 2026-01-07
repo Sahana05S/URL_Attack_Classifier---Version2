@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Search, AlertCircle, Shield, FileText } from 'lucide-react';
-import { fetchEvents, fetchExplanation, fetchStoryline } from '../api';
+import { fetchEvents, getExplanation, getStoryline } from '../api';
 
 const Investigation = () => {
     const [events, setEvents] = useState([]);
@@ -14,9 +14,9 @@ const Investigation = () => {
 
     const handleEventClick = async (event) => {
         setSelectedEvent(event);
-        const exp = await fetchExplanation(event.event_id);
+        const exp = await getExplanation(event.event_id);
         setExplanation(exp);
-        const story = await fetchStoryline(event.source_ip);
+        const story = await getStoryline(event.source_ip);
         setStoryline(story);
     };
 

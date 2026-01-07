@@ -8,3 +8,7 @@ matplotlib
 seaborn
 pytest
 requests
+sqlalchemy
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart

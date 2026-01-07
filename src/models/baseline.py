@@ -36,11 +36,18 @@ class TFIDFClassifier:
         self.is_trained = True
         print("TF-IDF Classifier trained successfully.")
 
-    def predict(self, events: List[UnifiedEvent]) -> List[str]:
+    def predict(self, texts: List[str]) -> List[str]:
         if not self.is_trained:
-            raise ValueError("Model is not trained.")
-        X = self._extract_features(events)
-        return self.pipeline.predict(X).tolist()
+            # Return "Normal" by default if not trained
+            return ["Normal"] * len(texts)
+        return self.pipeline.predict(texts).tolist()
+
+    def predict_proba(self, texts: List[str]):
+        if not self.is_trained:
+            # Return uniform probability [0.5, 0.5] if not trained
+            import numpy as np
+            return np.array([[0.5, 0.5]] * len(texts))
+        return self.pipeline.predict_proba(texts)
     
     def save(self, path: str):
         with open(path, 'wb') as f:

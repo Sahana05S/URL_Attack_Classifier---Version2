@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { AlertTriangle, CheckCircle, Activity } from 'lucide-react';
-import { fetchTimeline, fetchTopIPs } from '../api';
+import { getTimeline, getTopIPs } from '../api';
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
     <div className="glass-panel" style={{ padding: '1.5rem', flex: 1, display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -20,8 +20,8 @@ const Dashboard = () => {
     const [topIps, setTopIps] = useState([]);
 
     useEffect(() => {
-        fetchTimeline().then(setTimeline);
-        fetchTopIPs().then(setTopIps);
+        getTimeline().then(setTimeline);
+        getTopIPs().then(setTopIps);
     }, []);
 
     return (
