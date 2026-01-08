@@ -12,12 +12,13 @@ const Signup = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
         try {
             await signup(username, password);
             navigate('/');
         } catch (err) {
             console.error('Signup Error:', err);
-            setError(err.message || 'Signup failed.');
+            setError(err.message || 'Signup failed. Please try a different username.');
         }
     };
 
@@ -27,45 +28,91 @@ const Signup = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'var(--bg-dark)'
+            background: 'var(--bg-deep)',
+            backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(71, 19, 150, 0.1) 0%, transparent 60%)'
         }}>
-            <div className="glass-panel" style={{ padding: '2.5rem', width: '400px', textAlign: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-                    <UserPlus color="var(--accent)" size={40} />
-                    <h1 style={{ fontSize: '1.75rem', margin: 0 }}>Create Account</h1>
+            <div className="glass-panel animate-in" style={{
+                padding: '3.5rem',
+                width: '100%',
+                maxWidth: '450px',
+                textAlign: 'center',
+                background: 'rgba(17, 5, 90, 0.8)',
+                boxShadow: '0 0 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(71, 19, 150, 0.3)'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
+                    <div style={{
+                        width: 48,
+                        height: 48,
+                        background: 'linear-gradient(135deg, var(--accent), var(--bg-deep))',
+                        borderRadius: 14,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '1px solid var(--glass-border)'
+                    }}>
+                        <UserPlus color="var(--primary)" size={28} />
+                    </div>
+                    <h1 style={{ fontSize: '2.25rem', fontWeight: 800, margin: 0, letterSpacing: '-0.03em' }}>Join <span className="glow-text">Sentinel</span></h1>
                 </div>
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <div style={{ textAlign: 'left' }}>
-                        <label style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Username</label>
+                        <label style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem', display: 'block', marginLeft: '0.25rem' }}>Full Username</label>
                         <input
                             type="text"
                             className="glass-panel"
-                            style={{ width: '100%', padding: '0.75rem', marginTop: '0.25rem', background: 'rgba(0,0,0,0.2)' }}
+                            style={{
+                                width: '100%',
+                                padding: '1.1rem',
+                                background: 'rgba(255, 255, 255, 0.03)',
+                                border: '1px solid var(--glass-border)',
+                                color: 'white',
+                                borderRadius: '14px',
+                                boxSizing: 'border-box'
+                            }}
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             required
                         />
                     </div>
                     <div style={{ textAlign: 'left' }}>
-                        <label style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Password</label>
+                        <label style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem', display: 'block', marginLeft: '0.25rem' }}>Secure Password</label>
                         <input
                             type="password"
                             className="glass-panel"
-                            style={{ width: '100%', padding: '0.75rem', marginTop: '0.25rem', background: 'rgba(0,0,0,0.2)' }}
+                            style={{
+                                width: '100%',
+                                padding: '1.1rem',
+                                background: 'rgba(255, 255, 255, 0.03)',
+                                border: '1px solid var(--glass-border)',
+                                color: 'white',
+                                borderRadius: '14px',
+                                boxSizing: 'border-box'
+                            }}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
                     </div>
-                    {error && <p style={{ color: 'var(--danger)', fontSize: '0.875rem' }}>{error}</p>}
-                    <button type="submit" className="btn-primary" style={{ marginTop: '1rem', padding: '0.75rem' }}>
-                        Register
+                    {error && (
+                        <div style={{
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            color: 'var(--danger)',
+                            padding: '0.75rem',
+                            borderRadius: '10px',
+                            fontSize: '0.9rem',
+                            border: '1px solid rgba(239, 68, 68, 0.2)'
+                        }}>
+                            {error}
+                        </div>
+                    )}
+                    <button type="submit" className="btn-primary" style={{ marginTop: '1rem', padding: '1.1rem' }}>
+                        Create Security Account
                     </button>
                 </form>
 
-                <p style={{ marginTop: '1.5rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                    Already have an account? <Link to="/login" style={{ color: 'var(--primary)', textDecoration: 'none' }}>Log In</Link>
+                <p style={{ marginTop: '2.5rem', color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+                    Already registered? <Link to="/login" className="glow-text" style={{ textDecoration: 'none' }}>Access your terminal</Link>
                 </p>
             </div>
         </div>
