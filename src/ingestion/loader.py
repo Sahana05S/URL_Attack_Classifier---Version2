@@ -71,12 +71,13 @@ class DataLoader:
                 except:
                     data['confidence'] = 0.0
 
-                # Ensure labels have defaults if missing (will be filled by ML in main.py)
-                if not data.get('attack_type'):
-                    data['attack_type'] = "Analyzing..."
-                
-                if data.get('is_successful') is None:
-                    data['is_successful'] = False
+                # CRITICAL: Ignore pre-labeled columns from uploads
+                # All detection will be performed by the backend detection engine
+                # Set placeholder values that will be overwritten during upload processing
+                data['attack_type'] = "Pending"      # Will be set by detection engine
+                data['is_successful'] = False        # Will be inferred from response
+                data['confidence'] = 0.0             # Will be set by detection engine
+                data['rule_hits'] = []               # Will be populated by detection engine
 
                 events.append(UnifiedEvent(**data))
             return events
@@ -91,7 +92,35 @@ class DataLoader:
         try:
             with open(path, 'r') as f:
                 data = json.load(f)
-            return [UnifiedEvent(**item) for item in data]
+            
+            import uuid
+            events = []
+            for item in data:
+                # Ensure required fields have defaults
+                if not item.get('event_id'):
+                    item['event_id'] = str(uuid.uuid4())
+                if not item.get('method'):
+                    item['method'] = 'GET'
+                if not item.get('user_agent'):
+                    item['user_agent'] = 'Unknown'
+                if 'response_size' not in item:
+                    item['response_size'] = 0
+                if 'status_code' not in item:
+                    item['status_code'] = 200
+                if not isinstance(item.get('headers'), dict):
+                    item['headers'] = {}
+                
+                # CRITICAL: Ignore pre-labeled columns from uploads
+                # All detection will be performed by the backend detection engine
+                item['attack_type'] = "Pending"      # Will be set by detection engine
+                item['is_successful'] = False        # Will be inferred from response
+                item['confidence'] = 0.0             # Will be set by detection engine
+                item['rule_hits'] = []               # Will be populated by detection engine
+                
+                events.append(UnifiedEvent(**item))
+            return events
         except Exception as e:
             print(f"Error loading JSON {path}: {e}")
+            import traceback
+            traceback.print_exc()
             return []

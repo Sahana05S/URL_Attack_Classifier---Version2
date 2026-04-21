@@ -15,7 +15,9 @@ import time
 import io
 import shutil
 import os
+import traceback
 from src.ingestion.loader import DataLoader
+from src.detection.url_attack_detector import URLAttackDetector, infer_attack_success
 
 app = FastAPI(title="URL Attack Classifier API")
 
@@ -87,6 +89,9 @@ DB_EVENTS: List[UnifiedEvent] = []
 MODEL_TFIDF = TFIDFClassifier()
 MODEL_RULES = RuleBasedDetector()
 MODEL_SUCCESS = SuccessClassifier()
+
+# URL Attack Detector - primary detection engine
+ATTACK_DETECTOR = URLAttackDetector()
 
 @app.on_event("startup")
 def startup_event():
@@ -164,26 +169,27 @@ def get_top_ips(limit: int = 5):
 def get_explanation(event_id: str):
     """
     Get explainability details for a specific event.
+    Returns detection results inferred by the backend detection engine.
     """
     event = next((e for e in DB_EVENTS if e.event_id == event_id), None)
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
-        
-    # Re-run rule detection for explanation
-    rule_hits = MODEL_RULES.analyze(event)
     
-    # Fake confidence for demo if not computed
-    confidence = event.confidence if event.confidence > 0 else random.uniform(0.7, 0.99)
+    # Use stored detection results (already computed during upload)
+    # Re-run detection only if needed for complete match info
+    full_result = ATTACK_DETECTOR.detect(event.url, event.payload)
     
     return {
         "event_id": event_id,
-        "attack_type": event.attack_type,
-        "confidence": confidence,
-        "rule_hits": rule_hits, # Dict {type: [rules]}
-        "payload_snippet": (event.payload or "")[:50],
+        "attack_type": event.attack_type,  # Inferred by detection engine
+        "confidence": event.confidence,     # Detection confidence
+        "rule_hits": full_result["all_matches"],  # Dict {type: [rules]}
+        "detection_reasons": event.rule_hits,  # List of reasons
+        "payload_snippet": (event.payload or "")[:100],
+        "is_inferred": True,  # Flag to indicate this is backend-inferred
         "factors": [
-            "Matches known attack pattern" if rule_hits else "Heuristic text analysis",
-            f"Response code {event.status_code} consistent with result"
+            f"Detected via: {', '.join(event.rule_hits)}" if event.rule_hits else "No specific patterns matched - classified as Normal",
+            f"Response code {event.status_code} {'suggests successful attack' if event.is_successful else 'indicates blocked/failed attempt'}"
         ]
     }
 
@@ -267,31 +273,24 @@ async def upload_logs(
         if not new_events:
             raise HTTPException(status_code=400, detail="No valid events found in file.")
 
-        # Classify events if they don't have predictions
-        for i, event in enumerate(new_events):
-            # Simple heuristic: if confidence is 0.0, we probably need to predict
-            if event.confidence <= 0.1:
-                # 1. Rules
-                matches = MODEL_RULES.analyze(event)
-                if matches:
-                    # Pick the first matching attack type from rules
-                    event.attack_type = list(matches.keys())[0]
-                    # Flatten all rule descriptions
-                    all_hits = []
-                    for rule_list in matches.values():
-                        all_hits.extend(rule_list)
-                    event.rule_hits = all_hits
-                    event.confidence = 1.0 # Rule hits are 100% confident for this demo
-                else:
-                    # 2. ML Probability if no rules hit
-                    probs = MODEL_TFIDF.predict_proba([event.url])[0]
-                    event.confidence = float(max(probs))
-                    
-                    # 3. Label based on ML (assuming class 1 is Attack if 2 classes, or highest prob)
-                    if len(probs) > 1 and probs[1] > 0.5:
-                         event.attack_type = "Attack"
-                    else:
-                         event.attack_type = "Normal"
+        # ALWAYS run detection - ignore any pre-labeled data from uploads
+        # This ensures the backend infers attacks rather than trusting CSV labels
+        print(f"DEBUG: Running attack detection on {len(new_events)} events...")
+        for event in new_events:
+            # Run URL attack detection
+            result = ATTACK_DETECTOR.detect(event.url, event.payload)
+            
+            # Update event with detection results
+            event.attack_type = result["inferred_attack_type"]
+            event.confidence = result["confidence_score"]
+            event.rule_hits = result["detection_reasons"]
+            
+            # Infer attack success from response characteristics
+            event.is_successful = infer_attack_success(
+                event.status_code, 
+                event.response_size, 
+                event.attack_type
+            )
         
         print(f"DEBUG: Classified all events")
         # Add to global store

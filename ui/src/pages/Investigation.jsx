@@ -104,16 +104,29 @@ const Investigation = () => {
                         </h2>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                             <div className="glass-panel" style={{ padding: '1.5rem', background: 'rgba(0,0,0,0.2)' }}>
-                                <label style={{ color: 'var(--text-muted)', fontSize: '0.85rem', letterSpacing: '0.05em', fontWeight: 600 }}>DETECTION CONFIDENCE</label>
+                                <label style={{ color: 'var(--text-muted)', fontSize: '0.85rem', letterSpacing: '0.05em', fontWeight: 600 }}>INFERRED CONFIDENCE</label>
                                 <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'white', marginTop: '0.5rem' }}>
                                     {(explanation.confidence * 100).toFixed(1)}<span style={{ fontSize: '1rem', color: 'var(--primary)' }}>%</span>
                                 </div>
                             </div>
                             <div className="glass-panel" style={{ padding: '1.5rem', background: 'rgba(0,0,0,0.2)' }}>
-                                <label style={{ color: 'var(--text-muted)', fontSize: '0.85rem', letterSpacing: '0.05em', fontWeight: 600 }}>HEURISTIC MARKERS</label>
+                                <label style={{ color: 'var(--text-muted)', fontSize: '0.85rem', letterSpacing: '0.05em', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    DETECTION REASONS
+                                    {explanation.is_inferred && (
+                                        <span style={{
+                                            background: 'rgba(16, 185, 129, 0.2)',
+                                            color: '#10b981',
+                                            padding: '0.2rem 0.5rem',
+                                            borderRadius: '4px',
+                                            fontSize: '0.7rem',
+                                            fontWeight: 700,
+                                            letterSpacing: '0.05em'
+                                        }}>INFERRED</span>
+                                    )}
+                                </label>
                                 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
-                                    {Object.entries(explanation.rule_hits).map(([type, rules]) => (
-                                        <span key={type} style={{
+                                    {explanation.detection_reasons && explanation.detection_reasons.map((reason, idx) => (
+                                        <span key={idx} style={{
                                             background: 'rgba(177, 59, 255, 0.15)',
                                             color: 'var(--primary)',
                                             padding: '0.5rem 0.8rem',
@@ -121,9 +134,9 @@ const Investigation = () => {
                                             fontSize: '0.85rem',
                                             fontWeight: 600,
                                             border: '1px solid rgba(177, 59, 255, 0.2)'
-                                        }}>{type}</span>
+                                        }}>{reason}</span>
                                     ))}
-                                    {!Object.keys(explanation.rule_hits).length && <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Neural Network Prediction</span>}
+                                    {(!explanation.detection_reasons || !explanation.detection_reasons.length) && <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No attack patterns detected - classified as Normal</span>}
                                 </div>
                             </div>
                         </div>
