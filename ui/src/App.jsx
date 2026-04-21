@@ -7,6 +7,8 @@ import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import UploadLogs from './pages/UploadLogs';
+import LiveEvents from './pages/LiveEvents';
+import SettingsPage from './pages/Settings';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import './index.css';
 
@@ -147,7 +149,9 @@ const AuthenticatedLayout = () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="/investigate" element={<Investigation />} />
           <Route path="/upload" element={<UploadLogs />} />
-          <Route path="*" element={<div style={{ color: 'white' }}>Work in Progress</div>} />
+          <Route path="/live" element={<LiveEvents />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="*" element={<div style={{ color: 'white', padding: '2rem' }}>Page not found.</div>} />
         </Routes>
       </main>
     </div>
